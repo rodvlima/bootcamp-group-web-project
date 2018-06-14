@@ -1,30 +1,42 @@
-createPage(null,null);
+createMainPage();
 
-function createPage(type,id){
-    type = (type==null?'main':type);
-    
+function createMainPage(){
+
     const app = document.getElementById('root');
     const logo = document.createElement('img');
     logo.src = 'img/logo1.jpg';
+    
     const container = document.createElement('div');
-    
-    if(type!='main'){
-        app.innerHTML = "";
-    }
-    
     container.setAttribute('class','container');
     container.setAttribute('id','container');
     
+    const character = document.createElement('div');
+    character.setAttribute('class','character');
+    character.setAttribute('id','character');
+    character.style = 'display:none';
+    
+    // app.innerHTML = "";
     app.appendChild(logo);
     app.appendChild(container);
+    app.appendChild(character);
     
-    loadCharacters(type,id);
+    loadApi(null,null);
 };  
 
-function clearBox(elementID)
-{
-    document.getElementById(elementID).innerHTML = "";
-}
+function loadApi(type,value){
+    const api = apiAddress(type,value);
+    //open a new connection using the get resquest
+    fetch(api)
+    //convert the response to json
+    .then(function(response){
+        return response.json();
+    })
+    //work with the json information
+    .then(function(data){
+        fetchMarvelList(type,value,data)
+    })
+};
+
 function apiAddress(type,value){
     const apiAddress = 'http://gateway.marvel.com/v1/public/';
     const getType = 'characters';
@@ -42,40 +54,51 @@ function apiAddress(type,value){
     return api;
 };
 
-function loadCharacters(type,value){
-    const api = apiAddress(type,value);
-    //open a new connection using the get resquest
-    fetch(api)
-    //convert the response to json
-    .then(function(response){
-        return response.json();
-    })
-    //work with the json information
-    .then(function(data){
-        data = data.data.results;
-        for(var i in data){
-            //create and populate the card
-            const card = `
-                <div class="card" id=${data[i].id}>
-                    <h1>${data[i].name}</h1>
-                    <img src=${data[i].thumbnail.path}/portrait_xlarge.${data[i].thumbnail.extension}>
-                    <p>${data[i].description}</p>
-                </div>
-            `; // attention for this simbol: " ` "
-            if(data[i].description.length > 0){
-                container.innerHTML += card;
-            }
-        }
-        var children = document.getElementsByClassName("card");
-        for(var i = 0; type == 'main' && i < children.length; i++){
-            const idCharacter = document.getElementById(children[i].id);
-            var listener = document.getElementById(idCharacter.id).addEventListener("click",function(){
-                console.log(idCharacter.id);
-                createPage('character',idCharacter.id)
-
-
-        });
+function fetchMarvelList(type,value,data){
+    data = data.data.results;
+    for(var i in data){
+        createCard(type,i,data);
     }
-    })
-};
+    createListener(type,value);
+}
 
+function createCard(type,i,data){
+    const card = `
+        <div class="card" id=${(type=='character'?'char'+data[i].id:data[i].id)}>
+        <h1>${data[i].name}</h1>
+        <img src=${data[i].thumbnail.path}/portrait_xlarge.${data[i].thumbnail.extension}>
+        <p>${data[i].description}</p>
+        </div>
+        `; // attention for this simbol: " ` "
+    if(data[i].description.length > 0){
+        if(type == 'character'){
+            character.innerHTML = "";
+            character.innerHTML += card;
+            container.style = 'display:none';
+            character.style = '';
+        }else{
+            container.innerHTML += card;
+        }
+    }
+}
+
+function createListener(type,value){
+    if(type=="character"){
+        document.getElementById('char'+value).addEventListener("click",function(){
+            character.style = 'display:none';
+            container.style = '';
+        });
+    }else{
+        var children = document.getElementsByClassName("card");
+        for(var i = 0;i < children.length; i++){
+            const idCharacter = document.getElementById(children[i].id);
+            document.getElementById(idCharacter.id).addEventListener("click",function(){
+                loadApi('character',idCharacter.id);
+            });
+        }
+    }
+}
+
+function clearBox(elementID){
+    document.getElementById(elementID).innerHTML = "";
+}

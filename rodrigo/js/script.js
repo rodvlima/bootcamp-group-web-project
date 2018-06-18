@@ -58,7 +58,7 @@ function loadApi(type,value,offset){
 };
 
 function apiAddress(type,value,offset){
-    const apiAddress = 'http://gateway.marvel.com/v1/public/';
+    const apiAddress = 'https://gateway.marvel.com/v1/public/';
     const getType = 'characters';
     const apikey = '766611ab74f4e8ab5d5b29c5f6e7d398';
     const hash = 'aea69f12a4b31ababd0c88e37b488550';

@@ -96,7 +96,7 @@ function createCard(type,i,data){
         <img src=${data[i].thumbnail.path}/portrait_xlarge.${data[i].thumbnail.extension}>
         <p>${data[i].description}</p>
         </div>
-        `; // attention for this simbol: " ` "
+        `; // attention for this simbol: " ` " aaa
     if(data[i].description.length > 0){
         if(type == 'character'){
             character.innerHTML = "";

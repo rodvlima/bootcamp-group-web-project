@@ -97,7 +97,7 @@ function createCard(type,i,data){
         <p>${data[i].description}</p>
         </div>
         `; // attention for this simbol: " ` "
-    // if(data[i].description.length > 0){
+    if(data[i].description.length > 0){
         if(type == 'character'){
             character.innerHTML = "";
             character.innerHTML += card;
@@ -106,7 +106,7 @@ function createCard(type,i,data){
         }else{
             container.innerHTML += card;
         }
-    // }
+    }
 };
 
 function createListener(type,value){

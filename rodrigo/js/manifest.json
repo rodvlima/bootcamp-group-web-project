@@ -3,7 +3,7 @@
   "short_name": "Marvel",
   "theme_color": "black",
   "background_color": "red",
-  "display": "browser",
+  "display": "standalone",
   "Scope": "/",
   "start_url": "/",
   "icons": [

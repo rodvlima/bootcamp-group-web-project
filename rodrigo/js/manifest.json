@@ -1,12 +1,11 @@
 {
   "name": "Marvel Api",
   "short_name": "Marvel",
-  "description": "Show some Marvel characters",
   "theme_color": "black",
   "background_color": "red",
   "display": "standalone",
   "Scope": "/",
-  "start_url": ".",
+  "start_url": "/",
   "icons": [
     {
       "src": "images/icons/icon-72x72.png",

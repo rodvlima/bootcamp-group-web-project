@@ -1,26 +1,8 @@
-// createMainPage();
-
 (function createMainPage(){
 
     const app = document.getElementById('root');
-    const preLoader = document.createElement('div');
-    preLoader.setAttribute('id','preLoader');
-    preLoader.setAttribute('align','center');
-    preLoader.setAttribute('style','height: 200px;');
-    const loader = document.createElement('div');
-    loader.setAttribute('class','loader');
-    loader.setAttribute('id','loader');
-    loader.style.display = 'none';
-
     const logo = document.createElement('img');
     logo.src = 'img/logo1.jpg';
-    
-    const spam = document.createElement('spam');
-    spam.setAttribute('class','temp');
-    spam.setAttribute('id','temp');
-    spam.setAttribute('offset','0');
-    spam.setAttribute('limit','50');
-    spam.setAttribute('scroll','');
     
     const container = document.createElement('div');
     container.setAttribute('class','container');
@@ -30,6 +12,23 @@
     character.setAttribute('class','character');
     character.setAttribute('id','character');
     character.style.display = 'none';
+    
+    const preLoader = document.createElement('div');
+    preLoader.setAttribute('id','preLoader');
+    preLoader.setAttribute('align','center');
+    preLoader.setAttribute('style','height: 200px;');
+    
+    const loader = document.createElement('div');
+    loader.setAttribute('class','loader');
+    loader.setAttribute('id','loader');
+    loader.style.display = 'none';
+    
+    const spam = document.createElement('spam');
+    spam.setAttribute('class','temp');
+    spam.setAttribute('id','temp');
+    spam.setAttribute('offset','0');
+    spam.setAttribute('limit','50');
+    spam.setAttribute('scroll','');
     
     preLoader.appendChild(loader);
     app.appendChild(logo);
@@ -50,10 +49,11 @@ function scrollBottom(){
                     loader.style.display = '';
                     loading = true;
                     loadApi(null,null);
+                }else{
                 }
             }else{
-                loader.style.display = 'none';
                 loading = false;
+                // loader.style.display = 'none';
             }
         }
     }
@@ -102,29 +102,32 @@ function fetchMarvelList(type,value,data){
 
 function createCard(type,i,data){
     const card = `
-        <div class="card" id=${(type=='character'?'char'+data[i].id:data[i].id)}>
-        <h1>${data[i].name}</h1>
-        <img src=${data[i].thumbnail.path}/portrait_xlarge.${data[i].thumbnail.extension}>
-        <p>${data[i].description}</p>
-        </div>
-        `; // attention for this simbol: " ` "
+    <div class="card" id=${(type=='character'?'char'+data[i].id:data[i].id)}>
+    <h1>${data[i].name}</h1>
+    <img src=${data[i].thumbnail.path}/portrait_xlarge.${data[i].thumbnail.extension}>
+    <p>${data[i].description}</p>
+    </div>
+    `; // attention for this simbol: " ` "
     if(data[i].description.length > 0){
         if(type == 'character'){
             character.innerHTML = '';
             character.innerHTML += card;
             container.style.display = 'none';
             character.style.display = '';
+            preLoader.style.display = 'none';
         }else{
             container.innerHTML += card;
         }
+        loader.style.display = 'none';
     }
 };
 
 function createListener(type,value){
     if(type=='character'){
         document.getElementById('char'+value).addEventListener('click',function(){
-            character.style.display = 'none';
             container.style.display = '';
+            character.style.display = 'none';
+            preLoader.style.display = '';
         });
     }else{
         var children = document.getElementsByClassName('card');

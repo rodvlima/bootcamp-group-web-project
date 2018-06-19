@@ -16,7 +16,7 @@
     const preLoader = document.createElement('div');
     preLoader.setAttribute('id','preLoader');
     preLoader.setAttribute('align','center');
-    preLoader.setAttribute('style','height: 200px;');
+    preLoader.setAttribute('style','height: 150px;');
     
     const loader = document.createElement('div');
     loader.setAttribute('class','loader');

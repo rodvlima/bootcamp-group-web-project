@@ -99,7 +99,7 @@ function createCard(type,i,data){
         `; // attention for this simbol: " ` "
     if(data[i].description.length > 0){
         if(type == 'character'){
-            character.innerHTML = "";
+            character.innerHTML = '';
             character.innerHTML += card;
             container.style.display = 'none';
             character.style.display = '';
@@ -110,16 +110,16 @@ function createCard(type,i,data){
 };
 
 function createListener(type,value){
-    if(type=="character"){
-        document.getElementById('char'+value).addEventListener("click",function(){
+    if(type=='character'){
+        document.getElementById('char'+value).addEventListener('click',function(){
             character.style.display = 'none';
             container.style.display = '';
         });
     }else{
-        var children = document.getElementsByClassName("card");
+        var children = document.getElementsByClassName('card');
         for(var i = 0;i < children.length; i++){
             const idCharacter = document.getElementById(children[i].id);
-            document.getElementById(idCharacter.id).addEventListener("click",function(){
+            document.getElementById(idCharacter.id).addEventListener('click',function(){
                 loadApi('character',idCharacter.id,null);
             });
         }
@@ -127,5 +127,5 @@ function createListener(type,value){
 };
 
 // function clearElement(elementID){
-//     document.getElementById(elementID).innerHTML = "";
+//     document.getElementById(elementID).innerHTML = '';
 // };

@@ -1,9 +1,17 @@
-createMainPage();
+// createMainPage();
 
-function createMainPage(){
+(function createMainPage(){
 
     const app = document.getElementById('root');
-    
+    const preLoader = document.createElement('div');
+    preLoader.setAttribute('id','preLoader');
+    preLoader.setAttribute('align','center');
+    preLoader.setAttribute('style','height: 100px;');
+    const loader = document.createElement('div');
+    loader.setAttribute('class','loader');
+    loader.setAttribute('id','loader');
+    loader.style.display = 'none';
+
     const logo = document.createElement('img');
     logo.src = 'img/logo1.jpg';
     
@@ -23,14 +31,15 @@ function createMainPage(){
     character.setAttribute('id','character');
     character.style.display = 'none';
     
+    preLoader.appendChild(loader);
     app.appendChild(logo);
     app.appendChild(spam);
     app.appendChild(container);
     app.appendChild(character);
-    
+    app.appendChild(preLoader);
     scrollBottom();
     loadApi(null,null);
-};  
+})();  
 
 function scrollBottom(){
     let loading = false;
@@ -38,10 +47,12 @@ function scrollBottom(){
         if(character.style.display == 'none'){
             if((window.innerHeight+this.window.scrollY) >= this.document.body.scrollHeight){
                 if(loading == false){
+                    loader.style.display = '';
                     loading = true;
                     loadApi(null,null);
                 }
             }else{
+                loader.style.display = 'none';
                 loading = false;
             }
         }

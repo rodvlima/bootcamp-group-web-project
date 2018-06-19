@@ -8,7 +8,7 @@
   "background_color": "red",
   "display": "standalone",
   "Scope": "/",
-  "start_url": "js/",
+  "start_url": "img/logo.jpg",
   "icons": [
     {
       "src": "icons/icon-72x72.png",

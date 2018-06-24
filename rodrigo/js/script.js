@@ -1,3 +1,8 @@
+let offset = 0;
+let limit = 50;
+let scroll = true;
+let windowHeight ;
+
 (function createMainPage(){
 
     const app = document.getElementById('root');
@@ -8,52 +13,37 @@
     container.setAttribute('class','container');
     container.setAttribute('id','container');
     
-    const character = document.createElement('div');
-    character.setAttribute('class','character');
-    character.setAttribute('id','character');
-    character.style.display = 'none';
-    
     const preLoader = document.createElement('div');
     preLoader.setAttribute('id','preLoader');
     preLoader.setAttribute('align','center');
     preLoader.setAttribute('style','height: 150px;');
+    preLoader.setAttribute('style','display: "";');
     
     const loader = document.createElement('div');
     loader.setAttribute('class','loader');
     loader.setAttribute('id','loader');
     loader.style.display = 'none';
     
-    const spam = document.createElement('spam');
-    spam.setAttribute('class','temp');
-    spam.setAttribute('id','temp');
-    spam.setAttribute('offset','0');
-    spam.setAttribute('limit','50');
-    spam.setAttribute('scroll','');
-    
     preLoader.appendChild(loader);
     app.appendChild(logo);
-    app.appendChild(spam);
     app.appendChild(container);
-    app.appendChild(character);
     app.appendChild(preLoader);
     scrollBottom();
     loadApi(null,null);
 })();  
 
 function scrollBottom(){
-    let loading = false;
+    let loading = true;
     window.onscroll = function(){
-        if(character.style.display == 'none'){
+        if(scroll){
             if((window.innerHeight+this.window.scrollY) >= this.document.body.scrollHeight){
                 if(loading == false){
                     loader.style.display = '';
                     loading = true;
                     loadApi(null,null);
-                }else{
                 }
             }else{
                 loading = false;
-                // loader.style.display = 'none';
             }
         }
     }
@@ -79,9 +69,6 @@ function apiAddress(type,value){
     const apikey = '766611ab74f4e8ab5d5b29c5f6e7d398';
     const hash = 'aea69f12a4b31ababd0c88e37b488550';
     const ts = '1';
-    const limit = document.getElementById('temp').getAttribute('limit');
-    const offset = document.getElementById('temp').getAttribute('offset');
-    document.getElementById('temp').setAttribute('offset',parseInt(offset)+parseInt(limit));
     const orderBy = 'name';
     const nameStartsWith = '';
     let parameters = (type == 'character'?'/'+value:'');
@@ -89,6 +76,8 @@ function apiAddress(type,value){
     
     const validation = '&apikey='+apikey+'&hash='+hash+'&ts='+ts;
     const api = apiAddress+getType+parameters+validation
+
+    offset += limit;
     return api;
 };
 
@@ -97,49 +86,80 @@ function fetchMarvelList(type,value,data){
     for(var i in data){
         createCard(type,i,data);
     }
-    createListener(type,value);
+    createListener();
 };
 
 function createCard(type,i,data){
     const card = `
     <div class="card" id=${(type=='character'?'char'+data[i].id:data[i].id)}>
     <h1>${data[i].name}</h1>
-    <img src=${data[i].thumbnail.path}/portrait_xlarge.${data[i].thumbnail.extension}>
-    <p>${data[i].description}</p>
+    <img class="thumbnail" id=${'thumb'+data[i].id}" src=${data[i].thumbnail.path}/portrait_xlarge.${data[i].thumbnail.extension}>
+    <p id="description">${data[i].description}</p>
+    <div class="content" id=${"content"+data[i].id} style="display:none;">
+    <img class="back" id=${'back'+data[i].id} src='img/button-red-back.png' width=150px; height=50px;">
+    <div>
     </div>
     `; // attention for this simbol: " ` "
     if(data[i].description.length > 0){
-        if(type == 'character'){
-            character.innerHTML = '';
-            character.innerHTML += card;
-            container.style.display = 'none';
-            character.style.display = '';
-            preLoader.style.display = 'none';
-        }else{
-            container.innerHTML += card;
-        }
+        container.innerHTML += card;
         loader.style.display = 'none';
     }
 };
 
-function createListener(type,value){
-    if(type=='character'){
-        document.getElementById('char'+value).addEventListener('click',function(){
-            container.style.display = '';
-            character.style.display = 'none';
-            preLoader.style.display = '';
-        });
-    }else{
-        var children = document.getElementsByClassName('card');
-        for(var i = 0;i < children.length; i++){
-            const idCharacter = document.getElementById(children[i].id);
-            document.getElementById(idCharacter.id).addEventListener('click',function(){
-                loadApi('character',idCharacter.id,null);
-            });
+function createListener(){
+    //card listener
+    var cardElement = document.getElementsByClassName('card');
+    for(var i = 0; i < cardElement.length;i++){
+        const card = document.getElementById(cardElement[i].id);
+        for(var x = 0;x < card.children.length;x++){
+            if(card.children[x].className == 'thumbnail'){
+                const thumb = document.getElementById(card.children[x].id);
+                thumb.addEventListener('click',function(){hideCards(card.id);});
+            }
+            if(card.children[x].className == 'content'){
+                const content = document.getElementById(card.children[x].id).getElementsByClassName('back');
+                const back = document.getElementById(content[0].id)
+                back.addEventListener('click',function(){showCards()});
+            }
         }
     }
 };
 
-// function clearElement(elementID){
-//     document.getElementById(elementID).innerHTML = '';
-// };
+function showCards(){
+    //enable spinner
+    scroll = true;
+    
+    //display cards
+    var cardElement = document.getElementsByClassName('card');
+    for(var i = 0; i < cardElement.length;i++){
+        const card = document.getElementById(cardElement[i].id);
+        card.style.display = '';
+        const content = card.getElementsByClassName('content');
+        document.getElementById(content[0].id).style.display = 'none';
+    }
+    windowHeight.scrollIntoView();
+
+};
+
+function hideCards(idCharacter){
+    //disable spinner
+    scroll = false;
+    //hide others cards and remove listener
+    const cardElement = document.getElementsByClassName('card');
+    for(var i = 0; i < cardElement.length;i++){
+        const card = document.getElementById(cardElement[i].id);
+        const cardId = card.id;
+        if(cardId != idCharacter){
+            cardElement[i].style.display = 'none';
+        }else{
+            windowHeight = card;
+        }
+    }
+    //display "back" image
+    const card = document.getElementById(idCharacter);
+    for(var i = 0;i < card.children.length;i++){
+        if(card.children[i].className == 'content'){
+            card.children[i].style.display = '';
+        }
+    }
+};

@@ -55,34 +55,37 @@ function scrollBottom(){
     }
 };
 
-function apiAddress(type){
-    console.log(type)
-    const apiAddress = 'https://gateway.marvel.com/v1/public/';
+function apiAddress(type,idCharacter){
+    const apiAddress = 'https://gateway.marvel.com:443/v1/public/';
     const getType = 'characters';
+    const extra = (type && idCharacter?'/'+idCharacter+'/'+type:'');
     const apikey = '766611ab74f4e8ab5d5b29c5f6e7d398';
     const hash = 'aea69f12a4b31ababd0c88e37b488550';
     const ts = '1';
-    const orderBy = 'name';
+    // const orderBy = (type == 'comics'?'':'name');
+    const orderBy = (type == 'series'?'startYear':'name');
     const nameStartsWith = '';
     const validation = '?apikey='+apikey+'&hash='+hash+'&ts='+ts;
-    const parameters = '&orderBy='+orderBy+'&limit='+limit+'&offset='+offset;
+    const parameters = '&orderBy='+orderBy+(!type?'&limit='+limit+'&offset='+offset:'');
     let api = '';
-    api = apiAddress+getType+validation+parameters;
+    api = apiAddress+getType+extra+validation+parameters;
     offset += limit;
     return api;
 };  
 
-function loadApi(type){
-    const api = apiAddress(type);
-    //open a new connection using the get resquest
+function loadApi(type,idCharacter){
+    const api = apiAddress(type,idCharacter);
+    console.log(api)
     fetch(api)
-    //convert the response to json
     .then(function(response){
         return response.json();
     })
-    //work with the json information
     .then(function(data){
+        if(type && idCharacter){
+            fetchMarvelContents(data)
+        }else{
             fetchMarvelList(data)
+        }
     })
 };
 
@@ -116,12 +119,25 @@ function createCard(i,data){
     }
 };
 
+function createContent(i,data){
+    // console.log(data[i])
+    const comic = `
+    <div class="comic" id=${(data[i].id)}>
+    <center><h3>${data[i].title}</h3></center>
+    <img class="thumbnail" id=${'thumb'+data[i].id}" src=${data[i].thumbnail.path}/portrait_xlarge.${data[i].thumbnail.extension}>
+    <p id="description">${(!data[i].description)?'':data[i].description}</p>
+    </div>`; // attention for this simbol: " ` "
+
+        const content = document.getElementById('content');
+        content.innerHTML += comic;
+};
+
 function createCharacter(idCharacter){
     scroll = false;
     const character = document.getElementById('character');
     const card = document.getElementById(idCharacter);
     const clone = card.cloneNode(true);
-    clone.innerHTML += `<div id="content"></div>`;
+    clone.innerHTML += `<div id="content"><h2>Series</h2></div>`;
     clone.innerHTML += `<div id="back"><img id="back" src='img/button-red-back.png' width=150px; height=50px;"></div>`;
     character.innerHTML = '';
     character.appendChild(clone);
@@ -130,24 +146,8 @@ function createCharacter(idCharacter){
     document.getElementById('preLoader').style.display = 'none';
     character.style.display = '';
     cardPosition = card;
-};
-
-// function createContent(i,data){
-//     const card = `
-//     <div class="card" id=${(data[i].id)}>
-//     <h1>${data[i].name}</h1>
-//     <img class="thumbnail" id=${'thumb'+data[i].id}" src=${data[i].thumbnail.path}/portrait_xlarge.${data[i].thumbnail.extension}>
-//     <p id="description">${data[i].description}</p>
-//     <div class="content" id=${"content"+data[i].id} style="display:none;">
-//     <img class="back" id=${'back'+data[i].id} src='img/button-red-back.png' width=150px; height=50px;">
-//     </div>
-//     </div>`; // attention for this simbol: " ` "
-
-//     if(data[i].description.length > 0){
-//         container.innerHTML += card;
-//         loader.style.display = 'none';
-//     }
-// };
+    loadApi('series',idCharacter);
+};    
 
 function createListener(){
     //card listener

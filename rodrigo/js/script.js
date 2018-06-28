@@ -1,8 +1,8 @@
 let offset = 0;
 let limit = 20;
+let loading = true;
 let scroll = true;
 let cardPosition;
-let lastCard = 0;
 let marvelCharacters = [];
 // let marvelComics = [];
 
@@ -60,8 +60,7 @@ function createTopNav(){
     topBar.innerHTML += bar;
 };
 
-function scrollBottom(){
-    let loading = true;
+function scrollBottom(){    
     window.onscroll = function(){
         if(scroll){
             if((window.innerHeight+this.window.scrollY) >= this.document.body.scrollHeight){
@@ -69,6 +68,7 @@ function scrollBottom(){
                     loader.style.display = '';
                     loading = true;
                     loadApi();
+                    console.log('---------loadapi---------')
                 }
             }else{
                 loading = false;
@@ -78,7 +78,7 @@ function scrollBottom(){
 };
 
 function apiAddress(type,idCharacter){
-    const apiAddress = 'https://gateway.marvel.com/v1/public/';
+    const apiAddress = 'https://gateway.marvel.com:443/v1/public/';
     const getType = 'characters';
     const extra = (type && idCharacter?'/'+idCharacter+'/'+type:'');
     const apikey = '766611ab74f4e8ab5d5b29c5f6e7d398';
@@ -96,6 +96,12 @@ function apiAddress(type,idCharacter){
 
 function loadApi(type,character){
     const api = apiAddress(type,(character?character.id:null));
+    console.log(api)
+    if(!type){
+        console.log('get character')
+    }else{
+        console.log('get series')
+    }
     fetch(api)
     .then(function(response){
         return response.json();
@@ -104,20 +110,53 @@ function loadApi(type,character){
         if(type && character){
             data = data.data.results;
             marvelCharacters[marvelCharacters.indexOf(character)].series.items=data;
+            console.log('carregou'+marvelCharacters[marvelCharacters.indexOf(character)].name)
         }else{
             data = data.data.results;
             for(var i in data){
                 if(data[i].description.length > 0){
                     data[i].series.items='';
                     marvelCharacters.push(data[i]);
-                    console.log('carregou')
+                    console.log('Api ready')
                 };
             }
             fetchMarvelCharacters();
             createListener();
         }
-    })
+    });
 };
+
+// function loadSeries(type,character){
+//     const api = apiAddress(type,(character?character.id:null));
+//     if(!type){
+//         console.log('get character')
+//     }else{
+//         console.log('get series')
+//     }
+//     fetch(api)
+//     .then(function(response){
+//         return response.json();
+//     })
+//     .then(function(data){
+//         if(type && character){
+//             data = data.data.results;
+//             marvelCharacters[marvelCharacters.indexOf(character)].series.items=data;
+//             console.log('carregou'+marvelCharacters[marvelCharacters.indexOf(character)].name)
+//         }else{
+//             data = data.data.results;
+//             for(var i in data){
+//                 if(data[i].description.length > 0){
+//                     data[i].series.items='';
+//                     marvelCharacters.push(data[i]);
+//                     loading = false;
+//                     console.log('Api ready')
+//                 };
+//             }
+//             fetchMarvelCharacters();
+//             createListener();
+//         }
+//     });
+// };
 
 // function fetchMarvelList(data){
 //     data = data.data.results;
@@ -142,7 +181,8 @@ function loadApi(type,character){
 // };
 
 function fetchMarvelCharacters(){
-    marvelCharacters.forEach(i =>{
+    var toCard = marvelCharacters.filter(f=>f.loadCard!=true);
+    toCard.forEach(i =>{
         loadApi('series',i);
         createCard(i);
     });
@@ -165,24 +205,36 @@ function createCard(charObject){
 
 function createCharacter(idCharacter){
     var charObject = marvelCharacters.find(i => i.id == idCharacter);
-
+    var items = charObject.series.available;
     scroll = false;
     const character = document.getElementById('character');
     const card = document.getElementById(idCharacter);
     const clone = card.cloneNode(true);
     clone.setAttribute('id','char'+charObject.id);
     clone.setAttribute('class','charCard');
-    clone.innerHTML += `<h2>${(charObject.series.available==0?'Sorry, there is no series available for this character':'Series')}</h2><div class="content" id="content" style="display:'';"></div>`;
+    clone.innerHTML += `<h2>${(items==0?'Sorry, there is no series available for this character':'Series')}</h2><div class="content" id="content" style="display:'';"></div>`;
     clone.innerHTML += `<div class="back" id="back"><img id="back" src='img/button-red-back.png' width=150px; height=50px;"></div>`;
     character.innerHTML = '';
     character.appendChild(clone);
     document.getElementById('back').addEventListener('click',function(){showCards()});
     document.getElementById('container').style.display = 'none';
     document.getElementById('preLoader').style.display = 'none';
-    charObject.series.items.forEach(i => createSeries(i));
     character.style.display = '';
     cardPosition = card;
-    // loadApi('series',idCharacter);
+    if(items>0){
+        var counter = 0;
+        var interval = window.setInterval(items, 1000);
+        function items() {
+            if(charObject.series.items.length > 0){
+                charObject.series.items.forEach(i => createSeries(i));
+                clearInterval(interval);
+            }else if(counter == 10){
+                clearInterval(interval);
+                window.alert('Erro ao carregar a página')
+            }
+            counter++;
+        };
+    }
     character.scrollIntoView();
 };    
 
